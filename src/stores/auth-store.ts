@@ -1,15 +1,11 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import { User, Session, authService, handleApiResponse } from '@/lib/api'
 
-type User = {
-  id: string
-  email: string
-  name: string
-  role: 'admin' | 'user'
-}
 
 type AuthState = {
   user: User | null
+  session: Session | null
   isAuthenticated: boolean
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
@@ -21,39 +17,35 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
+      session: null,
       isAuthenticated: false,
       isLoading: false,
       login: async (email: string, password: string) => {
         try {
-          set({ isLoading: true })
-          // TODO: Replace with your actual login API
-          const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-          })
+          set({ isLoading: true });
 
-          if (!response.ok) {
-            throw new Error('Login failed')
-          }
+          const { user, session } = await handleApiResponse(
+            authService.login({ email, password })
+          );
 
-          const user = await response.json()
-          set({ user, isAuthenticated: true })
+          set({ user, session, isAuthenticated: true });
         } catch (error) {
-          console.error('Login error:', error)
-          throw error
+          console.error('Login error:', error);
+          throw error;
         } finally {
-          set({ isLoading: false })
+          set({ isLoading: false });
         }
       },
       logout: async () => {
         try {
-          set({ isLoading: true })
-          await fetch('/api/auth/logout', { method: 'POST' })
+          set({ isLoading: true });
+          await handleApiResponse(authService.logout());
+          set({ user: null, session: null, isAuthenticated: false });
         } catch (error) {
-          console.error('Logout error:', error)
+          console.error('Logout error:', error);
+          throw error;
         } finally {
-          set({ user: null, isAuthenticated: false, isLoading: false })
+          set({ isLoading: false });
         }
       },
       setLoading: (isLoading: boolean) => set({ isLoading }),
