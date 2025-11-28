@@ -10,6 +10,7 @@ const createHttpClient = (config?: AxiosRequestConfig): AxiosInstance => {
   const instance = axios.create({
     baseURL,
     timeout: 10000,
+    withCredentials: false, // Important for cookies
     headers: {
       'Content-Type': 'application/json',
     },

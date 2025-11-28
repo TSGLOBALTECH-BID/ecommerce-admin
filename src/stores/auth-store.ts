@@ -59,17 +59,34 @@ export const useAuthStore = create<AuthState>()(
 
 // Initialize the store
 export const initializeAuth = async () => {
-  const { setLoading } = useAuthStore.getState()
+  const { setLoading, user: storedUser, session } = useAuthStore.getState();
+  
   try {
-    setLoading(true)
-    const response = await fetch('/api/auth/me')
-    if (response.ok) {
-      const user = await response.json()
-      useAuthStore.setState({ user, isAuthenticated: true })
+    setLoading(true);
+    
+    // If we have a user in the store, verify the session is still valid
+    if (storedUser) {
+      try {
+        // const response = await fetch('/api/auth/me');
+        // if (response.ok) {
+          // const user = await response.json();
+          useAuthStore.setState({ user:storedUser, isAuthenticated: true });
+          return;
+        }
+      // }
+       catch (error) {
+        console.error('Session validation failed:', error);
+      }
+      // If we reach here, the session is invalid - clear the stored auth
+      useAuthStore.setState({ 
+        user: null, 
+        session: null, 
+        isAuthenticated: false 
+      });
     }
   } catch (error) {
-    console.error('Auth initialization error:', error)
+    console.error('Auth initialization error:', error);
   } finally {
-    setLoading(false)
+    setLoading(false);
   }
-}
+};
