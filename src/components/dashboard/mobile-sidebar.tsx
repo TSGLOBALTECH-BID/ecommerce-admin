@@ -5,12 +5,26 @@ import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
+import { 
+  LayoutDashboard, 
+  Package, 
+  ShoppingCart, 
+  Users, 
+  Settings,
+  ShieldCheck
+} from 'lucide-react'
+
 const navItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-  { name: 'Products', href: '/dashboard/products', icon: 'package' },
-  { name: 'Orders', href: '/dashboard/orders', icon: 'shopping-cart' },
-  { name: 'Customers', href: '/dashboard/customers', icon: 'users' },
-  { name: 'Settings', href: '/dashboard/settings', icon: 'settings' },
+  { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
+  { name: 'Products', href: '/dashboard/products', icon: <Package className="h-5 w-5" /> },
+  { name: 'Orders', href: '/dashboard/orders', icon: <ShoppingCart className="h-5 w-5" /> },
+  { name: 'Customers', href: '/dashboard/customers', icon: <Users className="h-5 w-5" /> },
+  { name: 'Settings', href: '/dashboard/settings', icon: <Settings className="h-5 w-5" /> },
+  { 
+  name: 'Authorized Products', 
+  href: '/dashboard/products', 
+  icon: <ShieldCheck className="h-5 w-5" /> 
+}
 ]
 
 export function MobileSidebar({
@@ -46,7 +60,7 @@ export function MobileSidebar({
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               )}
             >
-              <span className="mr-3">{item.icon}</span>
+              <span className="mr-3 flex-shrink-0">{item.icon}</span>
               {item.name}
             </a>
           ))}
