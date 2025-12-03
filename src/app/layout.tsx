@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 import { StoreProvider } from '@/providers/store-provider'
+import { ClientLayout } from "@/components/layout/client-layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,13 +25,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <StoreProvider>
-          {children}
+         <StoreProvider>
+          <ClientLayout>
+            {children}
+          </ClientLayout>
           <Toaster position="bottom-right" />
         </StoreProvider>
       </body>

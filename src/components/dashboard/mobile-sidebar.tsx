@@ -10,21 +10,15 @@ import {
   Package, 
   ShoppingCart, 
   Users, 
-  Settings,
-  ShieldCheck
+  Settings
 } from 'lucide-react'
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
-  { name: 'Products', href: '/dashboard/products', icon: <Package className="h-5 w-5" /> },
-  { name: 'Orders', href: '/dashboard/orders', icon: <ShoppingCart className="h-5 w-5" /> },
-  { name: 'Customers', href: '/dashboard/customers', icon: <Users className="h-5 w-5" /> },
-  { name: 'Settings', href: '/dashboard/settings', icon: <Settings className="h-5 w-5" /> },
-  { 
-  name: 'Authorized Products', 
-  href: '/dashboard/products', 
-  icon: <ShieldCheck className="h-5 w-5" /> 
-}
+  { name: 'Products', href: '/products', icon: <Package className="h-5 w-5" /> },
+  { name: 'Orders', href: '/orders', icon: <ShoppingCart className="h-5 w-5" /> },
+  { name: 'Customers', href: '/customers', icon: <Users className="h-5 w-5" /> },
+  { name: 'Settings', href: '/settings', icon: <Settings className="h-5 w-5" /> },
 ]
 
 export function MobileSidebar({
