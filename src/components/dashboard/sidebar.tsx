@@ -20,7 +20,7 @@ const navItems = [
   { name: 'Products', href: '/products', icon: <Package className="h-5 w-5" /> },
   { name: 'Orders', href: '/orders', icon: <ShoppingCart className="h-5 w-5" /> },
   { name: 'Customers', href: '/customers', icon: <Users className="h-5 w-5" /> },
-  { name: 'Settings', href: '/settings', icon: <Settings className="h-5 w-5" /> },
+  { name: 'Categories', href: '/categories', icon: <Settings className="h-5 w-5" /> },
 ]
 
 export function Sidebar() {
