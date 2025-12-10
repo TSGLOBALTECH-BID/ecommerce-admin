@@ -11,18 +11,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
+import { Category } from '@/lib/api/types/shared/category'
 
-export type Category = {
-  category_id: string
-  name: string
-  slug: string
-  parent_category_id: string | null
-  created_at: string
-  product_count?: number
-  parent_category_name?: string
-}
 
-export const columns: ColumnDef<Category>[] = [
+export const columns: ColumnDef<Category, string | number | undefined | null>[] = [
   {
     accessorKey: 'name',
     header: 'Category Name',

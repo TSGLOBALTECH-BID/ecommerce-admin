@@ -1,13 +1,20 @@
 // src/lib/api/utils.ts
-import { ApiResponse, isSuccessResponse } from './types';
+import { ApiResponse, BaseResponse, isSuccessResponse, PaginatedData, PaginatedResponse } from './types';
 
-export async function handleApiResponse<T>(apiCall: Promise<ApiResponse<T>>): Promise<T> {
+export async function handleApiResponse<T>(apiCall: Promise<BaseResponse<T>>): Promise<T> {
   const response = await apiCall;
   
-  if (isSuccessResponse(response)) {
+  if (response.success && response.data !== undefined) {
     return response.data;
   }
 
   const errorMessage = response.error?.message || 'An error occurred';
   throw new Error(errorMessage);
+}
+
+// For paginated responses
+export async function handlePaginatedResponse<T>(
+  apiCall: Promise<PaginatedResponse<T>>
+): Promise<PaginatedData<T>> {
+  return handleApiResponse(apiCall);
 }

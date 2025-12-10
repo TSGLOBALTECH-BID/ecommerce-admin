@@ -7,82 +7,73 @@ import { DataTable } from '@/components/ui/data-table'
 import { columns } from './columns'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Category } from '@/lib/api/types/shared/category'
 
-export type Category = {
-  id: string
-  name: string
-  slug: string
-  status: 'active' | 'inactive' | 'archived'
-  productCount: number
-  createdAt: string
-  parentId?: string | null
-  parentCategoryName?: string | null
-}
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // In a real app, you would fetch this from your API
     const fetchCategories = async () => {
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500))
-        
-        // Mock data - replace with actual API call
-        const mockCategories: Category[] = [
-          {
-            id: '1',
-            name: 'Electronics',
-            slug: 'electronics',
-            status: 'active',
-            productCount: 24,
-            createdAt: new Date().toISOString(),
-          },
-          {
-            id: '2',
-            name: 'Clothing',
-            slug: 'clothing',
-            status: 'active',
-            productCount: 56,
-            createdAt: new Date(Date.now() - 86400000).toISOString(),
-          },
-          {
-            id: '3',
-            name: 'Home & Kitchen',
-            slug: 'home-kitchen',
-            status: 'active',
-            productCount: 15,
-            parentId: '1',
-            parentCategoryName: 'Electronics',
-            createdAt: new Date(Date.now() - 172800000).toISOString(),
-          },
-          {
-            id: '4',
-            name: 'Toys & Games',
-            slug: 'toys-games',
-            status: 'inactive',
-            productCount: 18,
-            parentId: null,
-            parentCategoryName: null,
-            createdAt: new Date(Date.now() - 259200000).toISOString(),
-          },
-          {
-            id: '5',
-            name: 'Books',
-            slug: 'books',
-            status: 'archived',
-            productCount: 0,
-            parentId: null,
-            parentCategoryName: null,
-            createdAt: new Date(Date.now() - 345600000).toISOString(),
-          },
-        ]
-        
-        setCategories(mockCategories)
+        const response = await fetch('/api/categories')
+        if (!response.ok) {
+          throw new Error('Failed to fetch categories')
+        }
+        const data = await response.json()
+        setCategories(data)
       } catch (error) {
         console.error('Error fetching categories:', error)
+        // Fallback to mock data if API call fails
+        const mockCategories: Category[] = [
+          {
+            category_id: '1',
+            name: 'Electronics',
+            slug: 'electronics',
+            parent_category_id: null,
+            created_at: new Date().toISOString(),
+            product_count: 24,
+            parent_category_name: null,
+          },
+          {
+            category_id: '2',
+            name: 'Laptops',
+            slug: 'laptops',
+            parent_category_id: '1',
+            created_at: new Date().toISOString(),
+            product_count: 15,
+            parent_category_name: 'Electronics',
+          },
+          {
+            category_id: '3',
+            name: 'Smartphones',
+            slug: 'smartphones',
+            parent_category_id: '1',
+            created_at: new Date().toISOString(),
+            product_count: 32,
+            parent_category_name: 'Electronics',
+          },
+          {
+            category_id: '4',
+            name: 'Clothing',
+            slug: 'clothing',
+            parent_category_id: null,
+            created_at: new Date(Date.now() - 86400000).toISOString(),
+            product_count: 56,
+            parent_category_name: null,
+          },
+          {
+            category_id: '5',
+            name: 'Men\'s Fashion',
+            slug: 'mens-fashion',
+            parent_category_id: '4',
+            created_at: new Date(Date.now() - 172800000).toISOString(),
+            product_count: 28,
+            parent_category_name: 'Clothing',
+          },
+        ]
+        setCategories(mockCategories)
       } finally {
         setLoading(false)
       }
@@ -92,51 +83,57 @@ export default function CategoriesPage() {
   }, [])
 
   const handleAddNew = () => {
-    // Handle add new category
-    console.log('Add new category clicked')
+    // Navigate to add new category page
+    window.location.href = '/categories/new'
   }
 
   if (loading) {
     return (
-      <div className="container mx-auto py-10">
-        <div className="animate-pulse space-y-4">
-          <div className="h-10 w-48 bg-gray-200 rounded"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Categories</h1>
+          <Button onClick={handleAddNew}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Category
+          </Button>
+        </div>
+        <div className="rounded-md border">
+          <div className="p-4 text-center">Loading categories...</div>
         </div>
       </div>
     )
   }
 
-const transformCategory = (apiCategory: Category) => ({
-  category_id: apiCategory.id,
-  name: apiCategory.name,
-  slug: apiCategory.slug,
-  parent_category_id: apiCategory.parentId || null,
-  created_at: apiCategory.createdAt
-});
-
-// Then use it like this:
-const transformedCategories = categories.map(transformCategory);
-
   return (
-    <div className="container mx-auto py-10">
+    <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Product Categories</h1>
-        <Link href="/categories/new" passHref>
-          <Button>
+        <div>
+          <h1 className="text-2xl font-bold">Categories</h1>
+          <p className="text-sm text-gray-500">
+            {categories.length} {categories.length === 1 ? 'category' : 'categories'} found
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/categories/new">
             <Plus className="mr-2 h-4 w-4" />
             Add Category
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
-      
       <div className="rounded-md border">
-        <DataTable
-          data={transformedCategories}
-          columns={columns}
-          searchKey="name"
-          onAddNew={handleAddNew}
-        />
+        {categories.length === 0 ? (
+          <div className="p-8 text-center">
+            <p className="text-gray-500 mb-4">No categories found</p>
+            <Button asChild>
+              <Link href="/categories/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Create your first category
+              </Link>
+            </Button>
+          </div>
+        ) : (
+          <DataTable columns={columns} data={categories} searchKey={''} />
+        )}
       </div>
     </div>
   )

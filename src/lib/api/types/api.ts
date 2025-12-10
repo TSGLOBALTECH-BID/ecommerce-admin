@@ -15,21 +15,30 @@ export interface PaginationMeta {
   hasPreviousPage: boolean;
 }
 
+// Base response without pagination
 export interface BaseResponse<T = unknown> {
   success: boolean;
   message?: string;
-  data?: T;
+  data?: T;  // Make data required
   error?: ErrorDetails;
   status: number;
   version: string;
   timestamp: string;
-  meta?: PaginationMeta;
   requestId?: string;
 }
 
+// Paginated response with metadata
+export interface PaginatedData<T> {
+  items: T[];
+  meta: PaginationMeta;
+}
+
 // Type guards
-export function isSuccessResponse<T>(response: BaseResponse<T>): response is BaseResponse<T> & { success: true; data: T } {
-  return response.success === true && 'data' in response;
+export function isSuccessResponse<T>(response: BaseResponse<T>): response is BaseResponse<T> & { 
+  success: true; 
+  data: T  // data is guaranteed to exist when success is true
+} {
+  return response.success === true && 'data' in response && response.data !== undefined;
 }
 
 export function isErrorResponse(response: BaseResponse): response is BaseResponse & { success: false; error: ErrorDetails } {
@@ -41,15 +50,9 @@ export type ApiResponse<T = any> = BaseResponse<T>;
 export type ApiError = ErrorDetails;
 export type ApiPromise<T = any> = Promise<BaseResponse<T>>;
 
-// Extended pagination response
-export interface PaginatedResponse<T> extends BaseResponse<T[]> {
-  meta: PaginationMeta & {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
+// For paginated responses
+export type PaginatedResponse<T> = BaseResponse<PaginatedData<T>>;
+
 
 // API client configuration
 export interface ApiClientConfig {
