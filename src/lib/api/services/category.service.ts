@@ -11,13 +11,15 @@ import {
   GetCategoryResponse,
   GetCategoriesResponse,
   UpdateCategoryResponse,
-  DeleteCategoryResponse
+  DeleteCategoryResponse,
+  CategoriesResponseData,
+  CategoryResponseData
 } from '../types/category/response';
 
 export const categoryService = {
   // Create a new category
   create: (data: CreateCategoryRequest) => 
-    api.post<CreateCategoryResponse>('/categories', data),
+    api.post<CategoryResponseData>('/categories', data),
 
   // Get all categories with optional pagination and filtering
   getAll: (params?: GetCategoriesRequest) =>

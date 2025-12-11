@@ -12,6 +12,7 @@ import { useCategoryStore } from '@/stores/category-store'
 
 export default function AddCategoryPage() {
   const router = useRouter()
+  const createCategory = useCategoryStore(state => state.createCategory);
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
@@ -71,10 +72,10 @@ export default function AddCategoryPage() {
     const slug = formData.slug || generateSlug(formData.name);
     
     // Create the category using the store
-    const newCategory = await useCategoryStore.getState().createCategory({
+    const newCategory = await createCategory({
       name: formData.name,
       slug: slug,
-      parent_id: formData.parent_category_id || null
+      parent_category_id: formData.parent_category_id || null
     });
 
     if (newCategory) {

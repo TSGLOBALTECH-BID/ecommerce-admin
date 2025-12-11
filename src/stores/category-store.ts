@@ -97,8 +97,9 @@ export const useCategoryStore = create<CategoryState>()(
                 try {
                     set({ isLoading: true, error: null });
                     const response = await handleApiResponse(categoryService.create(data));
-                    await get().fetchCategories();
-                    return response.data?.category || null;
+                    // await get().fetchCategories();
+                    console.log('>>>>>',response)
+                    return response.category ?? null;
                 } catch (error) {
                     set({ error: error instanceof Error ? error.message : 'Failed to create category' });
                     throw error;

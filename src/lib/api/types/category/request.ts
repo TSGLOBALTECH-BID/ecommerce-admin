@@ -5,7 +5,7 @@ import { Category } from '../shared/category';
 export interface CreateCategoryRequest {
   name: string;
   slug: string;
-  parent_id?: string | null;
+  parent_category_id?: string | null;
 }
 
 // Update Category Request
@@ -23,5 +23,5 @@ export interface GetCategoriesRequest {
   page?: number;
   limit?: number;
   search?: string;
-  parent_id?: string | null;
+  parent_category_id?: string | null;
 }
