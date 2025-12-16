@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { categoryService, handleApiResponse, handlePaginatedResponse, PaginatedData } from '@/lib/api';
 import { Category, CategoryWithChildren } from '@/lib/api/types/shared/category';
-import { CategoriesResponseData, CategoryResponseData, CreateCategoryRequest, GetCategoriesResponse } from '@/lib/api/types/category';
+import { CategoriesResponseData, CategoryResponseData, CreateCategoryRequest } from '@/lib/api/types/category';
 
 type CategoryState = {
     categories: CategoryWithChildren[];
@@ -22,28 +22,31 @@ type CategoryState = {
 const buildCategoryTree = (data: Category[] | { data: Category[] }): CategoryWithChildren[] => {
     // Handle both direct array and paginated response
     const categories = Array.isArray(data) ? data : data.data;
-
-    const map = new Map<string, CategoryWithChildren>();
-    const roots: CategoryWithChildren[] = [];
-
     // Create a map of all categories
+    const map = new Map<string, CategoryWithChildren>();
+    const result: CategoryWithChildren[] = [];
+
+    // First pass: create all nodes
     categories.forEach(category => {
         map.set(category.category_id, { ...category, children: [] });
     });
 
-    // Build the tree
+    // Second pass: build the tree
     categories.forEach(category => {
+       
         const node = map.get(category.category_id)!;
-        if (category.parent_category_id && map.has(category.parent_category_id)) {
-            const parent = map.get(category.parent_category_id)!;
-            parent.children = parent.children || [];
-            parent.children.push(node);
-        } else {
-            roots.push(node);
+        if (category.parent_category_id) {
+            const parent = map.get(category.parent_category_id);
+            if (parent) {
+                parent.children = parent.children || [];
+                parent.children.push(node);
+                return;
+            }
         }
+        result.push(node);
     });
 
-    return roots;
+    return result;
 };
 
 export const useCategoryStore = create<CategoryState>()(
@@ -59,8 +62,8 @@ export const useCategoryStore = create<CategoryState>()(
             fetchCategories: async (params?: { page?: number; limit?: number }) => {
                 set({ isLoading: true, error: null });
                 try {
-                    const response = await handleApiResponse<GetCategoriesResponse>(categoryService.getAll(params));
-                    const categoryTree = buildCategoryTree(response.data?.items || []);
+                    const response = await handleApiResponse<CategoriesResponseData>(categoryService.getAll(params));
+                    const categoryTree = buildCategoryTree(response.categories || []);
                     set({
                         categories: categoryTree,
                         // If you need pagination in your store:
@@ -82,9 +85,9 @@ export const useCategoryStore = create<CategoryState>()(
             fetchCategoryById: async (id: string) => {
                 try {
                     set({ isLoading: true, error: null });
-                    const response = await handleApiResponse(categoryService.getById(id));
-                    set({ currentCategory: response.data?.category || null });
-                    return response.data?.category || null;
+                    const response = await handleApiResponse<CategoryResponseData>(categoryService.getById(id));
+                    set({ currentCategory: response.category || null });
+                    return response.category || null;
                 } catch (error) {
                     set({ error: error instanceof Error ? error.message : 'Failed to fetch category' });
                     throw error;
@@ -96,9 +99,8 @@ export const useCategoryStore = create<CategoryState>()(
             createCategory: async (data: CreateCategoryRequest) => {
                 try {
                     set({ isLoading: true, error: null });
-                    const response = await handleApiResponse(categoryService.create(data));
-                    // await get().fetchCategories();
-                    console.log('>>>>>',response)
+                    const response = await handleApiResponse<CategoryResponseData>(categoryService.create(data));
+                    await get().fetchCategories();
                     return response.category ?? null;
                 } catch (error) {
                     set({ error: error instanceof Error ? error.message : 'Failed to create category' });

@@ -13,8 +13,7 @@ import { useCategoryStore } from '@/stores/category-store'
 export default function AddCategoryPage() {
   const router = useRouter()
   const createCategory = useCategoryStore(state => state.createCategory);
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
+  // const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -22,23 +21,7 @@ export default function AddCategoryPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch('/api/categories')
-        if (!response.ok) throw new Error('Failed to fetch categories')
-        const data = await response.json()
-        setCategories(data)
-      } catch (error) {
-        console.error('Error fetching categories:', error)
-        toast.error('Failed to load categories')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchCategories()
-  }, [])
+  const { categories} = useCategoryStore()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -92,9 +75,9 @@ export default function AddCategoryPage() {
   }
 }
 
-  if (loading) {
-    return <div className="p-6">Loading categories...</div>
-  }
+  // if (loading) {
+  //   return <div className="p-6">Loading categories...</div>
+  // }
 
   return (
     <div className="p-6 max-w-2xl mx-auto">

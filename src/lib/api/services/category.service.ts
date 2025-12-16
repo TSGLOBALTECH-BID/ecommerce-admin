@@ -7,9 +7,7 @@ import {
   GetCategoriesRequest
 } from '../types/category/request';
 import {
-  CreateCategoryResponse,
-  GetCategoryResponse,
-  GetCategoriesResponse,
+  CreateCategoryResponse, 
   UpdateCategoryResponse,
   DeleteCategoryResponse,
   CategoriesResponseData,
@@ -23,11 +21,11 @@ export const categoryService = {
 
   // Get all categories with optional pagination and filtering
   getAll: (params?: GetCategoriesRequest) =>
-    api.get<GetCategoriesResponse>('/categories', { params }),
+    api.get<CategoriesResponseData>('/categories', { params }),
 
   // Get a single category by ID
   getById: (id: string) =>
-    api.get<GetCategoryResponse>(`/categories/${id}`),
+    api.get<CategoryResponseData>(`/categories/${id}`),
 
   // Update a category
   update: ({ category_id, ...data }: UpdateCategoryRequest) =>
@@ -39,9 +37,9 @@ export const categoryService = {
 
   // Get all parent categories (categories with no parent)
   getParentCategories: () =>
-    api.get<GetCategoriesResponse>('/categories/parents'),
+    api.get<CategoriesResponseData>('/categories/parents'),
 
   // Get subcategories for a specific parent category
   getSubcategories: (parentId: string) =>
-    api.get<GetCategoriesResponse>(`/categories/parent/${parentId}`)
+    api.get<CategoriesResponseData>(`/categories/parent/${parentId}`)
 };

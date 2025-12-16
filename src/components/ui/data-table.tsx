@@ -10,6 +10,8 @@ import {
   ColumnFiltersState,
   SortingState,
   getSortedRowModel,
+  ExpandedState,
+  getExpandedRowModel,
 } from "@tanstack/react-table"
 import { Button } from "./button"
 import { Input } from "./input"
@@ -29,6 +31,12 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   searchKey: string
   onAddNew?: () => void
+  getRowId?: (row: TData) => string
+  getSubRows?: (row: TData) => TData[] | undefined
+  initialState?: {
+    expanded?: ExpandedState
+    // Add other initial state properties as needed
+  }
 }
 
 export function DataTable<TData, TValue>({
@@ -36,10 +44,14 @@ export function DataTable<TData, TValue>({
   data,
   searchKey,
   onAddNew,
+  getRowId,
+  getSubRows,
+  initialState
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [rowSelection, setRowSelection] = useState({})
+  const [expanded, setExpanded] = useState<ExpandedState>(initialState?.expanded || {})
 
   const table = useReactTable({
     data,
@@ -51,10 +63,23 @@ export function DataTable<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onRowSelectionChange: setRowSelection,
+    getExpandedRowModel: getExpandedRowModel(),  // Add this line
+    onExpandedChange: (updater) => {
+      setExpanded(prev => {
+        const newState = typeof updater === 'function' ? updater(prev) : updater;
+        return newState;
+      });
+    },
+    getRowId,
+    getSubRows,
     state: {
       sorting,
       columnFilters,
       rowSelection,
+      expanded
+    },
+    initialState: {
+      ...initialState,
     },
   })
 
@@ -86,9 +111,9 @@ export function DataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   )
                 })}
@@ -98,9 +123,11 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
+                // In data-table.tsx, update the TableRow component:
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  data-expanded={row.getIsExpanded()}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

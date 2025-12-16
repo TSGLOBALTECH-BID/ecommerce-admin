@@ -1,178 +1,138 @@
 // src/app/categories/[id]/page.tsx
 'use client'
 
-import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { useCategoryStore } from '@/stores/category-store'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft, Pencil, Trash2, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
-
-type Category = {
-    id: string
-    name: string
-    slug: string
-    description?: string
-    status: 'active' | 'inactive' | 'archived'
-    productCount: number
-    createdAt: string
-    updatedAt: string
-    // Add any other category-specific fields
-}
+import { toast } from 'sonner'
+import { CategoryWithChildren } from '@/lib/api/types/shared/category'
 
 export default function CategoryDetailPage() {
     const { id } = useParams()
-    const [category, setCategory] = useState<Category | null>(null)
-    const [loading, setLoading] = useState(true)
+    const router = useRouter()
+    const { categories, deleteCategory, isLoading } = useCategoryStore()
 
-    useEffect(() => {
-        // In a real app, fetch category by ID from your API
-        const fetchCategory = async () => {
-            try {
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 500))
-
-                // Mock data - replace with actual API call
-                const mockCategory: Category = {
-                    id: id as string,
-                    name: 'Electronics',
-                    slug: 'electronics',
-                    description: 'All electronic devices and accessories',
-                    status: 'active',
-                    productCount: 24,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                }
-
-                setCategory(mockCategory)
-            } catch (error) {
-                console.error('Error fetching category:', error)
-            } finally {
-                setLoading(false)
+    const findCategoryById = (categories: CategoryWithChildren[], id: string): CategoryWithChildren | undefined => {
+        for (const category of categories) {
+            if (category.category_id === id) {
+                return category;
+            }
+            if (category.children && category.children.length > 0) {
+                const found = findCategoryById(category.children, id);
+                if (found) return found;
             }
         }
+        return undefined;
+    };
 
-        fetchCategory()
-    }, [id])
-
-    const getStatusVariant = (status: string) => {
-        switch (status) {
-            case 'active':
-                return 'bg-green-100 text-green-800'
-            case 'inactive':
-                return 'bg-yellow-100 text-yellow-800'
-            case 'archived':
-                return 'bg-gray-100 text-gray-800'
-            default:
-                return 'bg-gray-100 text-gray-800'
+    const category = findCategoryById(categories, id as string);
+    const childCategories = category?.children || [];
+    const handleDelete = async () => {
+        if (window.confirm('Are you sure you want to delete this category?')) {
+            try {
+                const success = await deleteCategory(id as string)
+                if (success) {
+                    toast.success('Category deleted successfully')
+                    router.push('/categories')
+                }
+            } catch (err) {
+                console.error('Error deleting category:', err)
+                toast.error('Failed to delete category')
+            }
         }
     }
 
-    if (loading) {
-        return (
-            <div className="container mx-auto py-10">
-                <div className="animate-pulse space-y-4">
-                    <div className="h-8 w-48 bg-gray-200 rounded"></div>
-                    <div className="h-4 w-32 bg-gray-200 rounded"></div>
-                    <div className="h-4 w-64 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        )
+    if (isLoading) {
+        return <div className="p-6">Loading...</div>
     }
 
     if (!category) {
         return (
-            <div className="container mx-auto py-10">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold">Category not found</h1>
-                    <Link href="/categories" className="text-blue-600 hover:underline mt-4 inline-block">
+            <div className="p-6">
+                <p>Category not found</p>
+                <Button variant="outline" className="mt-4" asChild>
+                    <Link href="/categories">
                         Back to Categories
                     </Link>
-                </div>
+                </Button>
             </div>
         )
     }
 
     return (
-        <div className="container mx-auto py-10">
-            <div className="mb-6">
-                <Link href="/categories" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4">
-                    <ArrowLeft className="h-4 w-4 mr-1" />
-                    Back to Categories
-                </Link>
-
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold">{category.name}</h1>
-                        <div className="flex items-center mt-2 space-x-2">
-
-                            {category.status.charAt(0).toUpperCase() + category.status.slice(1)}
-
-                            <span className="text-sm text-gray-500">
-                                {category.productCount} products
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="space-x-2">
-                        <Button variant="outline" size="sm" onClick={() => console.log('Edit', category.id)}>
-                            <Pencil className="h-4 w-4 mr-2" />
+        <div className="p-6 max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+                <Button variant="outline" size="sm" asChild>
+                    <Link href="/categories">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Categories
+                    </Link>
+                </Button>
+                <div className="flex space-x-2">
+                    <Button variant="outline" size="sm" asChild>
+                        <Link href={`/categories/${id}/edit`}>
+                            <Pencil className="mr-2 h-4 w-4" />
                             Edit
-                        </Button>
-                        <Button variant="destructive" size="sm" onClick={() => console.log('Delete', category.id)}>
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                        </Button>
-                    </div>
+                        </Link>
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={handleDelete}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                    </Button>
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+                <h1 className="text-2xl font-bold mb-4">{category.name}</h1>
+
                 <div className="space-y-4">
                     <div>
-                        <h2 className="text-lg font-medium text-gray-900">Category Information</h2>
-                        <p className="mt-1 text-sm text-gray-500">
-                            Basic details about this category.
+                        <h3 className="text-sm font-medium text-gray-500">Slug</h3>
+                        <p className="mt-1">{category.slug}</p>
+                    </div>
+
+                    {category.parent_category_name && (
+                        <div>
+                            <h3 className="text-sm font-medium text-gray-500">Parent Category</h3>
+                            <p className="mt-1">{category.parent_category_name}</p>
+                        </div>
+                    )}
+
+                    <div>
+                        <h3 className="text-sm font-medium text-gray-500">Created At</h3>
+                        <p className="mt-1">
+                            {new Date(category.created_at).toLocaleDateString()}
                         </p>
                     </div>
 
-                    <div className="border-t border-gray-200 pt-4">
-                        <dl className="divide-y divide-gray-200">
-                            <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                                <dt className="text-sm font-medium text-gray-500">Name</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                                    {category.name}
-                                </dd>
-                            </div>
-                            <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                                <dt className="text-sm font-medium text-gray-500">Slug</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                                    {category.slug}
-                                </dd>
-                            </div>
-                            <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                                <dt className="text-sm font-medium text-gray-500">Description</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                                    {category.description || 'No description provided.'}
-                                </dd>
-                            </div>
-                            <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                                <dt className="text-sm font-medium text-gray-500">Created</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                                    {new Date(category.createdAt).toLocaleDateString()}
-                                </dd>
-                            </div>
-                            <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                                <dt className="text-sm font-medium text-gray-500">Last Updated</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                                    {new Date(category.updatedAt).toLocaleDateString()}
-                                </dd>
-                            </div>
-                        </dl>
-                    </div>
+                    {category.product_count !== undefined && (
+                        <div>
+                            <h3 className="text-sm font-medium text-gray-500">Products</h3>
+                            <p className="mt-1">{category.product_count} products</p>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Add more sections here for related products, subcategories, etc. */}
+            {childCategories.length > 0 && (
+                <div className="bg-white rounded-lg shadow p-6">
+                    <h2 className="text-lg font-semibold mb-4">Subcategories</h2>
+                    <div className="space-y-2">
+                        {childCategories.map((child) => (
+                            <Link
+                                key={child.category_id}
+                                href={`/categories/${child.category_id}`}
+                                className="flex items-center justify-between p-3 rounded-md hover:bg-gray-50 transition-colors border"
+                            >
+                                <span>{child.name}</span>
+                                <ChevronRight className="h-4 w-4 text-gray-400" />
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

@@ -3,7 +3,7 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
-import { ArrowUpDown, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { ArrowUpDown, ChevronDown, ChevronRight, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,28 +11,56 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
-import { Category } from '@/lib/api/types/shared/category'
+import { Category, CategoryWithChildren } from '@/lib/api/types/shared/category'
 
 
-export const columns: ColumnDef<Category, string | number | undefined | null>[] = [
+export const columns: ColumnDef<CategoryWithChildren>[] = [
   {
+    id: "expand",
+    size: 40,
+    header: () => null,
+    cell: ({ row }) => {
+      const hasChildren = row.original.children && row.original.children.length > 0
+      return hasChildren ? (
+        <div className="w-8">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          onClick={(e) => {
+            e.stopPropagation();
+            console.log('Toggling row:', row.id, 'Current expanded state:', row.getIsExpanded());
+            row.toggleExpanded();
+            console.log('New expanded state:', row.getIsExpanded());
+          }}
+        >
+          {row.getIsExpanded() ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
+        </Button>
+        </div>
+      ) : null
+    },
+  }, {
     accessorKey: 'name',
     header: 'Category Name',
-    cell: ({ row }) => (
-      <div className="flex flex-col">
+    cell: ({ row }) => {
+      const hasChildren = row.original.children && row.original.children.length > 0
+      const depth = row.depth // Use the row's depth for indentation
+      const paddingLeft = `${depth * 10}px` // 20px per level of depth
+
+      return (
         <Link 
           href={`/categories/${row.original.category_id}`}
           className="font-medium text-blue-600 hover:underline"
+          style={{ paddingLeft }}
         >
           {row.getValue('name')}
         </Link>
-        {row.original.parent_category_name && (
-          <span className="text-xs text-gray-500">
-            Subcategory of: {row.original.parent_category_name}
-          </span>
-        )}
-      </div>
-    ),
+      )
+    },
   },
   {
     accessorKey: 'slug',
