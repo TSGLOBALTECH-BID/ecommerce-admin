@@ -17,4 +17,4 @@ export type CreateCategoryResponse = BaseResponse<CategoryResponseData>;
 // export type GetCategoryResponse = BaseResponse<CategoryResponseData>;
 // export type GetCategoriesResponse = PaginatedResponse<Category>;
 // export type UpdateCategoryResponse = BaseResponse<CategoryResponseData>;
-export type DeleteCategoryResponse = BaseResponse<{ id: string }>;
+// export type DeleteCategoryResponse = BaseResponse<{ id: string }>;

@@ -7,8 +7,6 @@ import {
   GetCategoriesRequest
 } from '../types/category/request';
 import {
-  CreateCategoryResponse, 
-  DeleteCategoryResponse,
   CategoriesResponseData,
   CategoryResponseData
 } from '../types/category/response';
@@ -32,7 +30,7 @@ export const categoryService = {
 
   // Delete a category
   delete: ({ category_id }: DeleteCategoryRequest) =>
-    api.delete<DeleteCategoryResponse>(`/categories/${category_id}`),
+    api.delete<any | null>(`/categories/${category_id}`),
 
   // Get all parent categories (categories with no parent)
   getParentCategories: () =>
