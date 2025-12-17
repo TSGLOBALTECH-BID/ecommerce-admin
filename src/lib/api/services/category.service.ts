@@ -8,7 +8,6 @@ import {
 } from '../types/category/request';
 import {
   CreateCategoryResponse, 
-  UpdateCategoryResponse,
   DeleteCategoryResponse,
   CategoriesResponseData,
   CategoryResponseData
@@ -29,7 +28,7 @@ export const categoryService = {
 
   // Update a category
   update: ({ category_id, ...data }: UpdateCategoryRequest) =>
-    api.patch<UpdateCategoryResponse>(`/categories/${category_id}`, data),
+    api.patch<CategoryResponseData>(`/categories/${category_id}`, data),
 
   // Delete a category
   delete: ({ category_id }: DeleteCategoryRequest) =>

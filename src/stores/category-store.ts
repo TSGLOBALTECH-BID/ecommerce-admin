@@ -120,7 +120,7 @@ export const useCategoryStore = create<CategoryState>()(
                     if (get().currentCategory?.category_id === id) {
                         await get().fetchCategoryById(id);
                     }
-                    return response.data?.category || null;
+                    return response.category || null;
                 } catch (error) {
                     set({ error: error instanceof Error ? error.message : 'Failed to update category' });
                     throw error;

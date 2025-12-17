@@ -124,8 +124,8 @@ export function LoginForm() {
           <Button type="button" variant="outline" onClick={() => form.reset()}>
             Reset
           </Button>
-          <Button type="submit" form="form-login">
-            Submit
+          <Button type="submit" disabled={isLoading} form="form-login">
+            {isLoading ? "Submitting...":"Submit"}
           </Button>
         </Field>
       </CardFooter>
