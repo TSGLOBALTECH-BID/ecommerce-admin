@@ -8,6 +8,7 @@ import { Product } from './columns'
 
 import { DataTable } from '@/components/ui/data-table'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 
 
@@ -27,19 +28,27 @@ export default function Products() {
     setProducts(mockProducts)
   }, [])
   return (
-    <div className="container mx-auto py-10">
+    <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Products</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Categories</h1>
+          <p className="text-sm text-gray-500">
+            {products.length} products
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/products/new">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Product
+          </Link>
+        </Button>
       </div>
+
       <div className="rounded-md border">
-        <DataTable<Product, string | number | Date>
-          data={products}
+        <DataTable<Product, unknown>
           columns={columns}
+          data={products}
           searchKey="name"
-          onAddNew={() => {
-            // Handle add new product
-            console.log('Add new product clicked')
-          }}
         />
       </div>
     </div>
